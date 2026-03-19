@@ -1,15 +1,46 @@
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 let users = [];
-let games = [
-  { id:1, home:"Flamengo", away:"Palmeiras", odd:2.1 },
-  { id:2, home:"Barcelona", away:"Real Madrid", odd:1.9 }
-];
+let games = [];
+
+// 🔑 COLOQUE SUA API KEY AQUI
+const API_KEY = "Dhcp1020@";
+
+// BUSCAR JOGOS REAIS
+async function updateGames(){
+  try{
+    const response = await axios.get("https://v3.football.api-sports.io/fixtures", {
+      headers: {
+        "x-apisports-key": API_KEY
+      },
+      params: {
+        date: new Date().toISOString().split("T")[0]
+      }
+    });
+
+    games = response.data.response.slice(0,10).map((g, i)=>({
+      id: i+1,
+      home: g.teams.home.name,
+      away: g.teams.away.name,
+      odd: (Math.random()*2+1).toFixed(2)
+    }));
+
+    console.log("Jogos atualizados:", games.length);
+
+  } catch(e){
+    console.log("Erro API:", e.message);
+  }
+}
+
+// atualiza sempre
+setInterval(updateGames, 60000);
+updateGames();
 
 app.get("/", (req,res)=>{
   res.send("Falconbets rodando 🦅");
