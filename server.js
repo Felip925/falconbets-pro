@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const axios = require("axios");
 
 const app = express();
 app.use(cors());
@@ -9,39 +8,39 @@ app.use(express.json());
 let users = [];
 let games = [];
 
-// 🔑 COLOQUE SUA API KEY AQUI
-const API_KEY = "Dhcp1020@";
+// 🧠 TIMES REAIS
+const teams = [
+  "Flamengo","Palmeiras","Corinthians","São Paulo",
+  "Barcelona","Real Madrid","Manchester City","Liverpool",
+  "PSG","Bayern Munich","Juventus","Chelsea"
+];
 
-// BUSCAR JOGOS REAIS
-async function updateGames(){
-  try{
-    const response = await axios.get("https://v3.football.api-sports.io/fixtures", {
-      headers: {
-        "x-apisports-key": API_KEY
-      },
-      params: {
-        date: new Date().toISOString().split("T")[0]
-      }
-    });
+// 🎲 GERAR JOGOS AUTOMÁTICOS
+function generateGames(){
+  games = [];
 
-    games = response.data.response.slice(0,10).map((g, i)=>({
-      id: i+1,
-      home: g.teams.home.name,
-      away: g.teams.away.name,
-      odd: (Math.random()*2+1).toFixed(2)
-    }));
+  for(let i=0; i<10; i++){
+    let home = teams[Math.floor(Math.random()*teams.length)];
+    let away = teams[Math.floor(Math.random()*teams.length)];
 
-    console.log("Jogos atualizados:", games.length);
-
-  } catch(e){
-    console.log("Erro API:", e.message);
+    if(home !== away){
+      games.push({
+        id: i+1,
+        home,
+        away,
+        odd: (Math.random()*2+1).toFixed(2)
+      });
+    }
   }
+
+  console.log("Jogos atualizados 🔥");
 }
 
-// atualiza sempre
-setInterval(updateGames, 60000);
-updateGames();
+// atualiza a cada 30 segundos
+setInterval(generateGames, 30000);
+generateGames();
 
+// ROTAS
 app.get("/", (req,res)=>{
   res.send("Falconbets rodando 🦅");
 });
